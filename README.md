@@ -383,6 +383,10 @@ And the `app/views/about/me.html.erb` view to show all the logged in user detail
 <p><b>Age:</b> <%= @logged_in_user.age %></p>
 ```
 
+Add the new page link to the home page:
+
+
+
 Now let's secure the page to only allow logged in users to access it.
 
 The `before_action :authorize_user` will trigger each time the action is called.
