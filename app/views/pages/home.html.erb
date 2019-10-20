@@ -1,0 +1,8 @@
+<h1>Home</h1>
+<% if @logged_in_user.nil? %>
+  <h2>Sign-in</h2>
+  <li><%= link_to("Login", controller: "session", action: "new") %></li>
+<% else %>
+  <h2>Welcome back, <%= @logged_in_user.name %>!</h2>
+  <li><%= link_to("Logout", login_path, :method => :delete) %></li>
+<% end %>
