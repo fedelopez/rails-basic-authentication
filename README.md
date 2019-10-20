@@ -1,4 +1,4 @@
-![General Assembly](https://github.com/fedelopez/rails-basic-auth/blob/master/docs/generalassembly.png)
+![General Assembly](https://github.com/fedelopez/rails-basic-authentication/blob/master/docs/generalassembly.png)
 
 # Rails Basic Authentication
 
@@ -295,7 +295,107 @@ Let's enrich the `home.html.erb` view to display a welcome message if the user i
 <% end %>
 ```
 
+## Logging out
 
+Now we can sign in users. Let's implement the log out flow.
+
+Whenever a logged in user clicks on the Logout link from the home page, we want to clear the session and redirect the user
+to the home page.
+
+Open the `destroy` action from the `SessionController`.
+
+Clear the `:user_id` from the `session` hash and redirect the user to the home screen:
+
+```ruby
+def destroy
+  session[:user_id] = nil
+  redirect_to '/'
+end
+```
+
+## Authorisation
+
+Now that we have set up the authentication system, let's work on authorisation - specifying what actions we will allow users to perform.
+
+Let's say we want most actions in our application to be restricted to authenticated users - users who have signed in 
+using valid credentials, and whose user_id is now stored in the sessions hash (thanks to our `session#create` action).
+
+Since this is not going to be limited to a particular controller, we'll put this code in our application_controller, 
+from which all other controllers inherit. So, in `app/controllers/application_controller.rb`:
+
+```ruby
+class ApplicationController < ActionController::Base
+​
+  # Before any action is performed, call the fetch_user method.
+  before_action :fetch_user
+​
+  private
+​
+  def fetch_user
+    # Search for a user by their user id if we can find one in the session hash.
+    if session[:user_id].present?
+      @current_user = User.find_by :id => session[:user_id]
+      # Clear out the session user_id if no user is found.
+      session[:user_id] = nil unless @current_user
+    end
+  end
+​
+  def authorize_user
+    redirect_to '/login' unless @current_user.present?
+  end
+end
+```
+
+Now we have a `@current_user` variable which will be available whenever a session includes a `user_id`. 
+We can use the presence of this variable to perform simple authorisation tasks.
+
+We also have an `authorise_user` method, which will redirect a user to the login page if that `@current_user` 
+variable is not present. We probably don't want to create a `before_action` for this method in our application controller, 
+since there are going to be a number of actions we want unauthenticated users to be able to do, like access the homepage, 
+sign-up, sign-in, etc.
+
+Instead, we'll call that method on a controller-by-controller basis.
+
+## Adding a page that only logged in users can access to it
+
+Let's create a new view, where only a login user can access to it.
+
+```bash
+rails generate controller About me
+```
+
+Update the controller to load the user info:
+
+```ruby
+class AboutController < ApplicationController
+  def me
+    @logged_in_user = User.find_by :id => session[:user_id]
+  end
+end
+```
+
+And the `app/views/about/me.html.erb` view to show all the logged in user details:
+
+```html
+<h1>Your details</h1>
+<p><b>Name:</b> <%= @logged_in_user.name %></p>
+<p><b>email:</b> <%= @logged_in_user.email %></p>
+<p><b>Age:</b> <%= @logged_in_user.age %></p>
+```
+
+Now let's secure the page to only allow logged in users to access it.
+
+The `before_action :authorize_user` will trigger each time the action is called.
+This method (defined in the parent class) will redirect non logged in users to the login page.
+
+```ruby
+class AboutController < ApplicationController
+  before_action :authorize_user
+  def me
+    @logged_in_user = User.find_by :id => session[:user_id]
+  end
+end
+```
 
 
 
