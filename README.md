@@ -15,7 +15,7 @@ cd rails-basic-auth
 rails db:create
 ```
 
-Create our User model and the migration for creating the users table in the DB:
+Create our `User` model and the corresponding migration for creating the users table in the DB:
 
 ```bash
 rails generate model User name:string password_digest:string age:integer email:string
@@ -25,6 +25,23 @@ Run the migration generated to create the users table in the database.
 
 ```bash
 rails db:migrate
+```
+
+## Password encryption
+
+Now, we need to use our Gemfile to get something that does the password encryption (hashing). 
+We normally use [bcrypt](https://github.com/codahale/bcrypt-ruby) for this.
+
+Open the file `Gemfile` and uncomment the following line:
+
+```ruby
+gem 'bcrypt', '~> 3.1.7'
+```
+
+Invoke `bundle` from the command line to download the dependency:
+
+```bash
+bundle
 ```
 
 ## Seeding the DB
@@ -43,23 +60,6 @@ Now seed the DB to apply insert the users:
 
 ```bash
 rails db:seed
-```
-
-## Password encryption
-
-Now, we need to use our Gemfile to get something that does the password encryption (hashing). 
-We normally use [bcrypt](https://github.com/codahale/bcrypt-ruby) for this.
-
-Open the file `Gemfile` and uncomment the following line:
-
-```ruby
-gem 'bcrypt', '~> 3.1.7'
-```
-
-Download the dependency:
-
-```bash
-bundle
 ```
 
 Open the file `app/models/user.rb` add the following line:
@@ -81,9 +81,9 @@ Read more about `has_secure_password`: https://api.rubyonrails.org/classes/Activ
 
 Our session controller has no associated model and only requires three actions:
 
-- new: shows the login form
-- create: signs in the use
-- destroy: logs out the user
+- `new`: shows the login form
+- `create`: signs in the use
+- `destroy`: logs out the user
 
 ```bash
 rails generate controller Session new create destroy
@@ -110,13 +110,13 @@ Create a `Pages` controller with a `home` action that will be the main entry poi
 rails generate controller Pages home
 ```
 
-Note: This will also generate an unwanted. Delete the following route from your `config/routes.rb` file:
+Note: This will also generate an unwanted route. Delete the following route from your `config/routes.rb` file:
 
 ```ruby
 get 'pages/home'
 ```
 
-Add the following routes to your config/routes.rb file:
+Make sure the `config/routes.rb` file the following routes:
 
 ```ruby
 root :to => 'pages#home' # the root will point to the home action of the Pages controller            
@@ -137,10 +137,9 @@ Add the following links to allow users login and logout.
   <li><%= link_to("Logout", login_path, :method => :delete) %></li>
 </ul>
 ```
-TODO: homogenise the link_to
 
-- Login points to the action `new` on the `SessionController` (`app/controllers/session_controller.rb`)
-- Logout points to the action `delete` on the `SessionController`  
+- `Login` link points to the action `new` on the `SessionController` (`app/controllers/session_controller.rb`)
+- `Logout` link points to the action `delete` on the `SessionController`  
 
 ## Creating the login form
 
